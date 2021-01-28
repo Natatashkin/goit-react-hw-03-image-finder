@@ -1,6 +1,7 @@
 import s from './Searchbar.module.css';
 import React, { Component } from 'react';
-// import { toast } from 'react-toastify';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default class Searchbar extends Component {
   state = {
@@ -8,16 +9,13 @@ export default class Searchbar extends Component {
   };
 
   handleSearchQuery = event => {
-    console.log(event.target);
-    console.log(event.currentTarget);
-
     this.setState({ searchQuery: event.target.value.toLowerCase() });
   };
 
   handleSubmit = event => {
     event.preventDefault();
     if (this.state.searchQuery.trim() === '') {
-      alert('Введите поисковый запрос!');
+      toast.error('Введите поисковый запрос!');
       return;
     }
     this.props.onHandleSubmit(this.state.searchQuery);

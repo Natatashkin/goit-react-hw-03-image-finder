@@ -19,10 +19,10 @@ class App extends Component {
     searchQuery: '',
     page: 1,
     galleryLength: null,
-    loading: false,
     showModal: false,
     modalOptions: {},
     error: null,
+    status: 'idle',
   };
 
   componentDidMount() {
@@ -46,7 +46,7 @@ class App extends Component {
 
   handleFetch = () => {
     const { searchQuery, page } = this.state;
-    this.setState({ loading: true });
+    this.setState({ status: 'pending' });
     fetch(
       `${API}&q=${searchQuery}&per_page=12&image_type=photo&orientation=horizontal&page=${page}`,
     )
@@ -62,16 +62,16 @@ class App extends Component {
         }
 
         if (page === 1) {
-          return this.setState({ gallery: [...obj.hits] });
+          return this.setState({ gallery: [...obj.hits], status: 'resolved' });
         }
         this.setState(prevState => ({
           gallery: [...prevState.gallery, ...obj.hits],
+          status: 'resolved',
         }));
       })
-      .catch(error => this.setState({ error }))
+      .catch(error => this.setState({ error, status: 'rejected' }))
       .finally(() => {
         this.getGalleryLength();
-        this.setState({ loading: false });
       });
   };
 
@@ -81,7 +81,7 @@ class App extends Component {
 
   handleLoadMoreClick = () => {
     this.setState(prevState => {
-      return { page: prevState.page + 1, loading: true };
+      return { page: prevState.page + 1 };
     });
   };
 
@@ -113,22 +113,49 @@ class App extends Component {
     const {
       gallery,
       galleryLength,
-      loading,
       showModal,
       modalOptions,
       page,
+      status,
     } = this.state;
-    return (
-      <div className="App">
-        <Searchbar onHandleSubmit={this.handleQuerySubmit} />
-        <ToastContainer position="top-right" autoClose={3000} />
-        <ImageGallery
-          photos={gallery}
-          forModal={this.getImageOptionsForModal}
-          openModal={this.toggleModal}
-          page={page}
-        />
-        {loading && (
+
+    if (status === 'idle' || status === 'resolved') {
+      return (
+        <div className="App">
+          <Searchbar onHandleSubmit={this.handleQuerySubmit} />
+          <ToastContainer position="top-right" autoClose={3000} />
+          <ImageGallery
+            photos={gallery}
+            forModal={this.getImageOptionsForModal}
+            openModal={this.toggleModal}
+            page={page}
+          />
+          {(galleryLength >= 12) & (status === 'resolved') && (
+            <Button click={this.handleLoadMoreClick} />
+          )}
+
+          {showModal && (
+            <Modal
+              options={modalOptions}
+              status={status}
+              onClose={this.toggleModal}
+            />
+          )}
+        </div>
+      );
+    }
+
+    if (status === 'pending') {
+      return (
+        <div className="App">
+          <Searchbar onHandleSubmit={this.handleQuerySubmit} />
+          <ToastContainer position="top-right" autoClose={3000} />
+          <ImageGallery
+            photos={gallery}
+            forModal={this.getImageOptionsForModal}
+            openModal={this.toggleModal}
+            page={page}
+          />
           <Loader
             type="Circles"
             className={loaderStyle.loader}
@@ -136,16 +163,18 @@ class App extends Component {
             height={60}
             width={60}
           />
-        )}
-        {(galleryLength >= 12) & (loading === false) && (
-          <Button click={this.handleLoadMoreClick} />
-        )}
+        </div>
+      );
+    }
 
-        {showModal && (
-          <Modal options={modalOptions} onClose={this.toggleModal} />
-        )}
-      </div>
-    );
+    if (status === 'rejected') {
+      return (
+        <div className="App">
+          <Searchbar onHandleSubmit={this.handleQuerySubmit} />
+          <ToastContainer position="top-right" autoClose={3000} />
+        </div>
+      );
+    }
   }
 }
 

@@ -4,8 +4,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
 import loaderStyle from '../Loader/Loader.module.css';
-// import Loader from 'react-loader-spinner';
-import Loader from '../Loader/';
+import Loader from 'react-loader-spinner';
+// import Loader from '../Loader/';
 import Image from './Image';
 
 const modalRoot = document.querySelector('#modal-root');
@@ -39,9 +39,21 @@ class Modal extends Component {
         className={s.Overlay}
         onClick={event => this.handleOverlayClick(event)}
       >
-        <div className={s.Modal}>
-          <Image src={src} alt={alt} />
-        </div>
+        {this.props.status === 'pending' && (
+          <Loader
+            type="Circles"
+            className={loaderStyle.loader}
+            color="#00BFFF"
+            height={60}
+            width={60}
+          />
+        )}
+
+        {this.props.status === 'resolved' && (
+          <div className={s.Modal}>
+            <Image src={src} alt={alt} />
+          </div>
+        )}
       </div>,
       modalRoot,
     );

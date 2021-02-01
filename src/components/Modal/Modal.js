@@ -1,10 +1,16 @@
 import s from './Modal.module.css';
-import { Component } from 'react';
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
+import loaderStyle from '../Loader/Loader.module.css';
+// import Loader from 'react-loader-spinner';
+import Loader from '../Loader/';
+import Image from './Image';
 
 const modalRoot = document.querySelector('#modal-root');
 
-export default class Modal extends Component {
+class Modal extends Component {
   componentDidMount() {
     window.addEventListener('keydown', this.handleKeyDown);
   }
@@ -26,17 +32,25 @@ export default class Modal extends Component {
   };
 
   render() {
-    const { src, alt } = this.props.options;
+    const { alt, src } = this.props.options;
+
     return createPortal(
       <div
         className={s.Overlay}
         onClick={event => this.handleOverlayClick(event)}
       >
         <div className={s.Modal}>
-          <img src={src} alt={alt} />
+          <Image src={src} alt={alt} />
         </div>
       </div>,
       modalRoot,
     );
   }
 }
+
+Modal.propTypes = {
+  options: PropTypes.object.isRequired,
+  onClose: PropTypes.func.isRequired,
+};
+
+export default Modal;

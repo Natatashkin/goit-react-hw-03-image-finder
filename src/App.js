@@ -1,7 +1,7 @@
 import './App.css';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import { Component } from 'react';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Searchbar from './components/Searchbar';
 import ImageGallery from './components/ImageGallery';
@@ -22,6 +22,7 @@ class App extends Component {
     loading: false,
     showModal: false,
     modalOptions: {},
+    error: null,
   };
 
   componentDidMount() {
@@ -36,6 +37,11 @@ class App extends Component {
       this.resetPage();
       this.handleFetch();
     }
+
+    if (prevState.error !== this.state.error) {
+      toast.error(this.state.error.message);
+      return;
+    }
   }
 
   handleFetch = () => {
@@ -44,8 +50,17 @@ class App extends Component {
     fetch(
       `${API}&q=${searchQuery}&per_page=12&image_type=photo&orientation=horizontal&page=${page}`,
     )
-      .then(resolve => resolve.json())
+      .then(response => response.json())
       .then(obj => {
+        if (obj.hits.length === 0) {
+          this.setState({ gallery: [] });
+          return Promise.reject(
+            new Error(
+              `По запросу ${this.state.searchQuery} ничего нет. Введите другой запрос.`,
+            ),
+          );
+        }
+
         if (page === 1) {
           return this.setState({ gallery: [...obj.hits] });
         }
@@ -53,6 +68,7 @@ class App extends Component {
           gallery: [...prevState.gallery, ...obj.hits],
         }));
       })
+      .catch(error => this.setState({ error }))
       .finally(() => {
         this.getGalleryLength();
         this.setState({ loading: false });
@@ -79,7 +95,7 @@ class App extends Component {
   };
 
   getImageOptionsForModal = event => {
-    return this.setState({
+    this.setState({
       modalOptions: {
         src: event.target.dataset.source,
         alt: event.target.alt,
@@ -100,6 +116,7 @@ class App extends Component {
       loading,
       showModal,
       modalOptions,
+      page,
     } = this.state;
     return (
       <div className="App">
@@ -109,6 +126,7 @@ class App extends Component {
           photos={gallery}
           forModal={this.getImageOptionsForModal}
           openModal={this.toggleModal}
+          page={page}
         />
         {loading && (
           <Loader

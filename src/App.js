@@ -26,7 +26,7 @@ class App extends Component {
   };
 
   componentDidMount() {
-    this.handleFetch();
+    // this.handleFetch();
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -36,11 +36,6 @@ class App extends Component {
     if (prevState.searchQuery !== this.state.searchQuery) {
       this.resetPage();
       this.handleFetch();
-    }
-
-    if (prevState.error !== this.state.error) {
-      toast.error(this.state.error.message);
-      return;
     }
   }
 
@@ -70,9 +65,7 @@ class App extends Component {
         }));
       })
       .catch(error => this.setState({ error, status: 'rejected' }))
-      .finally(() => {
-        this.getGalleryLength();
-      });
+      .finally(() => {});
   };
 
   handleQuerySubmit = searchQuery => {
@@ -87,11 +80,6 @@ class App extends Component {
 
   resetPage = () => {
     return this.setState({ page: 1 });
-  };
-
-  getGalleryLength = () => {
-    const { gallery } = this.state;
-    return this.setState({ galleryLength: gallery.length });
   };
 
   getImageOptionsForModal = event => {
@@ -112,10 +100,10 @@ class App extends Component {
   render() {
     const {
       gallery,
-      galleryLength,
       showModal,
       modalOptions,
       page,
+      error,
       status,
     } = this.state;
 
@@ -130,7 +118,7 @@ class App extends Component {
             openModal={this.toggleModal}
             page={page}
           />
-          {(galleryLength >= 12) & (status === 'resolved') && (
+          {(this.state.gallery.length >= 12) & (status === 'resolved') && (
             <Button click={this.handleLoadMoreClick} />
           )}
 
@@ -170,8 +158,13 @@ class App extends Component {
     if (status === 'rejected') {
       return (
         <div className="App">
-          <Searchbar onHandleSubmit={this.handleQuerySubmit} />
+          <Searchbar
+            onHandleSubmit={this.handleQuerySubmit}
+            status={status}
+            error={error}
+          />
           <ToastContainer position="top-right" autoClose={3000} />
+          {/* {error && toast.error(this.state.error.message)} */}
         </div>
       );
     }

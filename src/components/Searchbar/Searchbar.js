@@ -18,6 +18,10 @@ export default class Searchbar extends Component {
       toast.error('Введите поисковый запрос!');
       return;
     }
+    // if (this.props.status === 'rejected') {
+    //   toast.error(this.props.error.message);
+    //   return;
+    // }
     this.props.onHandleSubmit(this.state.searchQuery);
     this.setState({ searchQuery: '' });
   };

@@ -39,7 +39,7 @@ class Modal extends Component {
         className={s.Overlay}
         onClick={event => this.handleOverlayClick(event)}
       >
-        {this.props.status === 'pending' && (
+        {this.props.status === 'pending' ? (
           <Loader
             type="Circles"
             className={loaderStyle.loader}
@@ -47,9 +47,7 @@ class Modal extends Component {
             height={60}
             width={60}
           />
-        )}
-
-        {this.props.status === 'resolved' && (
+        ) : (
           <div className={s.Modal}>
             <Image src={src} alt={alt} />
           </div>

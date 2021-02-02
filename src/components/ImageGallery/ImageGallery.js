@@ -5,20 +5,13 @@ import ImageGalleryItem from './ImageGalleryItem';
 
 class ImageGallery extends Component {
   render() {
-    const images = this.props.photos;
-    const page = this.props.page;
-    if (page !== 1) {
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: 'smooth',
-      });
-    }
+    const { photos } = this.props;
     return (
       <ul
         className={s.ImageGallery}
         onClick={event => this.props.forModal(event)}
       >
-        {images.map(item => (
+        {photos.map(item => (
           <ImageGalleryItem
             key={item.id}
             options={item}

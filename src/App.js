@@ -18,37 +18,40 @@ class App extends Component {
     gallery: [],
     searchQuery: '',
     page: 1,
-    galleryLength: null,
+    loading: false,
     showModal: false,
     modalOptions: {},
     error: null,
-    status: 'idle',
   };
 
   componentDidMount() {
-    // this.handleFetch();
+    this.handleFetch();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  async componentDidUpdate(prevProps, prevState) {
     if (prevState.page !== this.state.page) {
       this.handleFetch();
     }
     if (prevState.searchQuery !== this.state.searchQuery) {
-      this.resetPage();
+      await this.setState({ page: 1, gallery: [] });
       this.handleFetch();
+    }
+
+    if (prevState.error !== this.state.error) {
+      return toast.error(this.state.error.message);
     }
   }
 
   handleFetch = () => {
     const { searchQuery, page } = this.state;
-    this.setState({ status: 'pending' });
+    this.setState({ loading: true });
     fetch(
       `${API}&q=${searchQuery}&per_page=12&image_type=photo&orientation=horizontal&page=${page}`,
     )
       .then(response => response.json())
       .then(obj => {
         if (obj.hits.length === 0) {
-          this.setState({ gallery: [] });
+          // this.setState({ gallery: [] });
           return Promise.reject(
             new Error(
               `По запросу ${this.state.searchQuery} ничего нет. Введите другой запрос.`,
@@ -56,16 +59,23 @@ class App extends Component {
           );
         }
 
-        if (page === 1) {
-          return this.setState({ gallery: [...obj.hits], status: 'resolved' });
-        }
+        // if (page === 1) {
+        //   return this.setState({ gallery: [...obj.hits] });
+        // }
         this.setState(prevState => ({
           gallery: [...prevState.gallery, ...obj.hits],
-          status: 'resolved',
         }));
       })
-      .catch(error => this.setState({ error, status: 'rejected' }))
-      .finally(() => {});
+      .catch(error => this.setState({ error, loading: true }))
+      .finally(() => {
+        this.setState({ loading: false });
+        if (page !== 1) {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth',
+          });
+        }
+      });
   };
 
   handleQuerySubmit = searchQuery => {
@@ -98,52 +108,20 @@ class App extends Component {
   };
 
   render() {
-    const {
-      gallery,
-      showModal,
-      modalOptions,
-      page,
-      error,
-      status,
-    } = this.state;
-
-    if (status === 'idle' || status === 'resolved') {
-      return (
-        <div className="App">
-          <Searchbar onHandleSubmit={this.handleQuerySubmit} />
-          <ToastContainer position="top-right" autoClose={3000} />
+    const { gallery, showModal, modalOptions, loading, page } = this.state;
+    return (
+      <div className="App">
+        <Searchbar onHandleSubmit={this.handleQuerySubmit} />
+        <ToastContainer position="top-right" autoClose={3000} />
+        {gallery.length > 0 && (
           <ImageGallery
             photos={gallery}
             forModal={this.getImageOptionsForModal}
             openModal={this.toggleModal}
             page={page}
           />
-          {(this.state.gallery.length >= 12) & (status === 'resolved') && (
-            <Button click={this.handleLoadMoreClick} />
-          )}
-
-          {showModal && (
-            <Modal
-              options={modalOptions}
-              status={status}
-              onClose={this.toggleModal}
-            />
-          )}
-        </div>
-      );
-    }
-
-    if (status === 'pending') {
-      return (
-        <div className="App">
-          <Searchbar onHandleSubmit={this.handleQuerySubmit} />
-          <ToastContainer position="top-right" autoClose={3000} />
-          <ImageGallery
-            photos={gallery}
-            forModal={this.getImageOptionsForModal}
-            openModal={this.toggleModal}
-            page={page}
-          />
+        )}
+        {loading && (
           <Loader
             type="Circles"
             className={loaderStyle.loader}
@@ -151,23 +129,15 @@ class App extends Component {
             height={60}
             width={60}
           />
-        </div>
-      );
-    }
-
-    if (status === 'rejected') {
-      return (
-        <div className="App">
-          <Searchbar
-            onHandleSubmit={this.handleQuerySubmit}
-            status={status}
-            error={error}
-          />
-          <ToastContainer position="top-right" autoClose={3000} />
-          {/* {error && toast.error(this.state.error.message)} */}
-        </div>
-      );
-    }
+        )}
+        {(this.state.gallery.length >= 12) & (loading === false) && (
+          <Button click={this.handleLoadMoreClick} />
+        )}
+        {showModal && (
+          <Modal options={modalOptions} onClose={this.toggleModal} />
+        )}
+      </div>
+    );
   }
 }
 

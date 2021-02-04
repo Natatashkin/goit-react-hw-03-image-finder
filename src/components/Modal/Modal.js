@@ -11,6 +11,10 @@ import Image from './Image';
 const modalRoot = document.querySelector('#modal-root');
 
 class Modal extends Component {
+  state = {
+    loading: true,
+  };
+
   componentDidMount() {
     window.addEventListener('keydown', this.handleKeyDown);
   }
@@ -31,6 +35,10 @@ class Modal extends Component {
     }
   };
 
+  onLoad = () => {
+    this.setState({ loading: false });
+  };
+
   render() {
     const { alt, src } = this.props.options;
 
@@ -39,19 +47,20 @@ class Modal extends Component {
         className={s.Overlay}
         onClick={event => this.handleOverlayClick(event)}
       >
-        {this.props.status === 'pending' ? (
-          <Loader
-            type="Circles"
-            className={loaderStyle.loader}
-            color="#00BFFF"
-            height={60}
-            width={60}
-          />
-        ) : (
-          <div className={s.Modal}>
-            <Image src={src} alt={alt} />
-          </div>
-        )}
+        <div className={s.Modal}>
+          {this.state.loading ? (
+            <Loader
+              type="Circles"
+              className={loaderStyle.loader}
+              color="#00BFFF"
+              height={60}
+              width={60}
+            />
+          ) : (
+            <img onLoad={this.onLoad} src={src} alt={alt} />
+            // <Image onLoad={this.onLoad} src={src} alt={alt} />
+          )}
+        </div>
       </div>,
       modalRoot,
     );

@@ -1,6 +1,7 @@
 import './App.css';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import { Component } from 'react';
+import { fetchGallery } from './services/API';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Searchbar from './components/Searchbar';
@@ -10,9 +11,6 @@ import loaderStyle from './components/Loader/Loader.module.css';
 import Loader from 'react-loader-spinner';
 import Modal from './components/Modal';
 
-const KEY = '14467768-9171c4f16b15a9d8391496270';
-const API = `https://pixabay.com/api/?key=${KEY}`;
-
 class App extends Component {
   state = {
     gallery: [],
@@ -21,7 +19,6 @@ class App extends Component {
     loading: false,
     showModal: false,
     modalOptions: {},
-    error: null,
   };
 
   componentDidMount() {
@@ -29,44 +26,31 @@ class App extends Component {
   }
 
   async componentDidUpdate(prevProps, prevState) {
-    if (prevState.page !== this.state.page) {
-      this.handleFetch();
-    }
+    // if (prevState.page !== this.state.page) {
+    //   this.handleFetch();
+    // }
     if (prevState.searchQuery !== this.state.searchQuery) {
       await this.setState({ page: 1, gallery: [] });
       this.handleFetch();
-    }
-
-    if (prevState.error !== this.state.error) {
-      return toast.error(this.state.error.message);
     }
   }
 
   handleFetch = () => {
     const { searchQuery, page } = this.state;
     this.setState({ loading: true });
-    fetch(
-      `${API}&q=${searchQuery}&per_page=12&image_type=photo&orientation=horizontal&page=${page}`,
-    )
-      .then(response => response.json())
+    fetchGallery(searchQuery, page)
       .then(obj => {
         if (obj.hits.length === 0) {
-          // this.setState({ gallery: [] });
-          return Promise.reject(
-            new Error(
-              `По запросу ${this.state.searchQuery} ничего нет. Введите другой запрос.`,
-            ),
+          toast.error(
+            `По запросу ${this.state.searchQuery} ничего нет. Введите другой запрос.`,
           );
+          return;
         }
-
-        // if (page === 1) {
-        //   return this.setState({ gallery: [...obj.hits] });
-        // }
         this.setState(prevState => ({
           gallery: [...prevState.gallery, ...obj.hits],
         }));
       })
-      .catch(error => this.setState({ error, loading: true }))
+      .catch(error => console.log(error))
       .finally(() => {
         this.setState({ loading: false });
         if (page !== 1) {
@@ -82,21 +66,22 @@ class App extends Component {
     this.setState({ searchQuery });
   };
 
-  handleLoadMoreClick = () => {
-    this.setState(prevState => {
+  handleLoadMoreClick = async () => {
+    await this.setState(prevState => {
       return { page: prevState.page + 1 };
     });
   };
 
-  resetPage = () => {
-    return this.setState({ page: 1 });
-  };
+  // resetPage = () => {
+  //   return this.setState({ page: 1 });
+  // };
 
   getImageOptionsForModal = event => {
     this.setState({
       modalOptions: {
         src: event.target.dataset.source,
         alt: event.target.alt,
+        loading: false,
       },
     });
   };

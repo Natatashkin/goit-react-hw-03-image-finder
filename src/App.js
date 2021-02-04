@@ -26,9 +26,9 @@ class App extends Component {
   }
 
   async componentDidUpdate(prevProps, prevState) {
-    // if (prevState.page !== this.state.page) {
-    //   this.handleFetch();
-    // }
+    if (prevState.page !== this.state.page) {
+      this.handleFetch();
+    }
     if (prevState.searchQuery !== this.state.searchQuery) {
       await this.setState({ page: 1, gallery: [] });
       this.handleFetch();
@@ -71,10 +71,6 @@ class App extends Component {
       return { page: prevState.page + 1 };
     });
   };
-
-  // resetPage = () => {
-  //   return this.setState({ page: 1 });
-  // };
 
   getImageOptionsForModal = event => {
     this.setState({

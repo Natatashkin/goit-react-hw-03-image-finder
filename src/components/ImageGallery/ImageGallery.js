@@ -7,10 +7,7 @@ class ImageGallery extends Component {
   render() {
     const { photos } = this.props;
     return (
-      <ul
-        className={s.ImageGallery}
-        onClick={event => this.props.forModal(event)}
-      >
+      <ul className={s.ImageGallery} onClick={this.props.forModal}>
         {photos.map(item => (
           <ImageGalleryItem
             key={item.id}

@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
 import loaderStyle from '../Loader/Loader.module.css';
 import Loader from 'react-loader-spinner';
-// import Loader from '../Loader/';
 import Image from './Image';
 
 const modalRoot = document.querySelector('#modal-root');
@@ -16,6 +15,7 @@ class Modal extends Component {
   };
 
   componentDidMount() {
+    window.addEventListener('onload', this.onLoad);
     window.addEventListener('keydown', this.handleKeyDown);
   }
 
@@ -32,6 +32,7 @@ class Modal extends Component {
   handleOverlayClick = event => {
     if (event.currentTarget === event.target) {
       this.props.onClose();
+      this.setState({ loading: true });
     }
   };
 
@@ -43,12 +44,9 @@ class Modal extends Component {
     const { alt, src } = this.props.options;
 
     return createPortal(
-      <div
-        className={s.Overlay}
-        onClick={event => this.handleOverlayClick(event)}
-      >
+      <div className={s.Overlay} onClick={this.handleOverlayClick}>
         <div className={s.Modal}>
-          {this.state.loading ? (
+          {this.state.loading && (
             <Loader
               type="Circles"
               className={loaderStyle.loader}
@@ -56,10 +54,8 @@ class Modal extends Component {
               height={60}
               width={60}
             />
-          ) : (
-            <img onLoad={this.onLoad} src={src} alt={alt} />
-            // <Image onLoad={this.onLoad} src={src} alt={alt} />
           )}
+          <Image onLoad={this.onLoad} src={src} alt={alt} />
         </div>
       </div>,
       modalRoot,

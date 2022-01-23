@@ -28,7 +28,6 @@ export default class App extends Component {
     showModal: false,
     modalImage: null,
     modalAlt: null,
-    currentImage: null,
   };
 
   async componentDidUpdate(prevProps, prevState) {

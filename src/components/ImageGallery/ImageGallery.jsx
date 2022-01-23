@@ -11,7 +11,7 @@ const ImageGallery = ({ images, onClick }) => {
           key={index}
           src={webformatURL}
           alt={tags}
-          onClick={() => onClick(webformatURL, tags)}
+          onClick={() => onClick(largeImageURL, tags)}
         />
       ))}
     </Gallery>

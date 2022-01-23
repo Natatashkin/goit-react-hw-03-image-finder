@@ -44,6 +44,10 @@ export default class App extends Component {
     }
 
     if (prevPage !== nextPage) {
+      if (prevPage > nextPage) {
+        return;
+      }
+      this.setState({ status: Status.PENDING });
       await this.fetchImages(query, nextPage);
     }
   }
@@ -107,12 +111,13 @@ export default class App extends Component {
     return (
       <AppStyles>
         <Searchbar onSubmit={this.handleInputValue} />
-        {status === 'pending' && <Loader />}
+        {status === 'pending' && page === 1 && <Loader />}
         {images.length > 0 && (
           <ImageGallery images={images} onClick={this.handleShowModal} />
         )}
+        {status === 'pending' && page > 1 && <Loader />}
         {status === 'resolved' && page < totalPages && (
-          <Button onClick={this.handleLoadMoreButtonClick} />
+          <Button onClick={this.handleLoadMoreButtonClick} status={status} />
         )}
         <Toaster />
         {showModal && (

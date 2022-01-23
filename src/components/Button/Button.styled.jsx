@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const LoadMoreButton = styled.button`
+const LoadMoreButton = styled.button`
   padding: 8px 16px;
   border-radius: 2px;
   background-color: #3f51b5;
@@ -25,3 +25,10 @@ export const LoadMoreButton = styled.button`
     background-color: #303f9f;
   }
 `;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
+export { LoadMoreButton, ButtonContainer };

@@ -38,7 +38,7 @@ export default class App extends Component {
     const nextPage = page;
 
     if (prevQuery !== nextQuery) {
-      this.setState({ status: Status.PENDING, images: [], page: 1 });
+      this.setState({ status: Status.PENDING, images: [] });
       await this.fetchImages(query, page);
     }
 
@@ -78,7 +78,7 @@ export default class App extends Component {
   };
 
   handleInputValue = searchQuery => {
-    this.setState({ query: searchQuery });
+    this.setState({ query: searchQuery, page: 1 });
   };
 
   handleLoadMoreButtonClick = e => {

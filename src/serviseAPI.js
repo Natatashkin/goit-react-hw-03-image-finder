@@ -1,5 +1,4 @@
 import axios from 'axios';
-import toast, { Toaster } from 'react-hot-toast';
 
 const AUTH_TOKEN = '14467768-9171c4f16b15a9d8391496270';
 axios.defaults.baseURL = 'https://pixabay.com/api/';

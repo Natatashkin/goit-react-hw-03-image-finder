@@ -34,8 +34,10 @@ export default class App extends Component {
     const { query, page } = this.state;
     const prevQuery = prevState.query;
     const nextQuery = query;
+    const prevPage = prevState.page;
+    const nextPage = page;
 
-    if (prevQuery !== nextQuery) {
+    if (prevQuery !== nextQuery || prevPage !== nextPage) {
       this.setState({ status: Status.PENDING });
       await this.fetchImages(query, page);
     }
@@ -71,17 +73,14 @@ export default class App extends Component {
     this.setState({ query: searchQuery, page: 1, images: [] });
   };
 
-  incrementPage = async () => {
+  incrementPage = () => {
     this.setState(prevState => {
       return { page: prevState.page + 1 };
     });
   };
 
-  handleLoadMoreButtonClick = async e => {
-    await this.incrementPage();
-    this.setState({ status: Status.PENDING });
-    const { query, page } = this.state;
-    await this.fetchImages(query, page);
+  handleLoadMoreButtonClick = e => {
+    this.incrementPage();
   };
 
   toggleModal = () => {
